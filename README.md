@@ -1,2 +1,3 @@
-# sediment_1d
+# Sediment Transport in 1D
+
 Sediment transport with lower order derivatives.
