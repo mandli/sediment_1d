@@ -33,17 +33,16 @@ from six.moves import range
 num_eqn = 3
 num_waves = 3
 
-
 def shallow_fwave_1d(q_l, q_r, aux_l, aux_r, problem_data):
     r"""Shallow water Riemann solver using fwaves
     """
 
     g = problem_data['grav']
     dry_tolerance = problem_data['dry_tolerance']
-    sea_level = problem_data['sea_level']
+    num_species = problem_data['num_species']
 
     num_rp = q_l.shape[1]
-    num_eqn = 3
+    num_eqn = 2 + num_species
     num_waves = 3
 
     # Output arrays
@@ -73,23 +72,22 @@ def shallow_fwave_1d(q_l, q_r, aux_l, aux_r, problem_data):
 
     delta1 = q_r[1, :] - q_l[1, :]
     delta2 = phi_r - phi_l + g * h_bar * (aux_r[0, :] - aux_l[0, :])
-    delta3 = q_r[2, :] - q_l[2, :]
 
     beta1 = (s[1, :] * delta1 - delta2) / (s[1, :] - s[0, :])
     beta2 = (delta2 - s[0, :] * delta1) / (s[1, :] - s[0, :])
-    beta3 = delta3
 
     fwave[0, 0, :] = beta1
     fwave[1, 0, :] = beta1 * s[0, :]
-    fwave[2, 0, :] = 0.0
+    fwave[2:, 0, :] = 0.0
 
     fwave[0, 1, :] = beta2
     fwave[1, 1, :] = beta2 * s[1, :]
-    fwave[2, 1, :] = 0.0
+    fwave[2:, 1, :] = 0.0
     
-    fwave[0, 2, :] = 0.0
-    fwave[1, 2, :] = 0.0
-    fwave[2, 2, :] = beta3
+    fwave[0, 2:, :] = 0.0
+    fwave[1, 2:, :] = 0.0
+    for n in range(num_species):
+        fwave[2 + n, 2, :] = q_r[2 + n, :] - q_l[2 + n, :]
 
     for m in range(num_eqn):
         for mw in range(num_waves):
